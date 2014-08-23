@@ -97,6 +97,7 @@ module model {
     }
 
     export class Movable extends Square {
+        inHole : boolean = false;
         constructor(x: number, y: number) {
             super(x, y);
         }
@@ -168,8 +169,8 @@ module model {
             gs.width = 9;
             gs.height = 9;
             gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7)];
-            gs.hole = new Hole(5, 5);
-            gs.hor = new Horizontal(8, 8);
+            gs.hole = new Hole(4, 2);
+            gs.hor = new Horizontal(4, 3);
             gs.ver = new Vertical( 4, 6);
         }
     }
@@ -188,10 +189,16 @@ module model {
         ver   : Vertical;
         loadLevel() : void {
             this.levelLoader.loadLevel(this, this.level);
+            this.hor.inHole = false;
+            this.ver.inHole = false;
         }
 
         nextLevel() : void {
             this.level += 1;
+        }
+
+        hasWon() : boolean {
+            return this.hor.inHole && this.ver.inHole;
         }
     }
 }
@@ -215,7 +222,38 @@ module view {
                 ev.nextEvent();
             });
             document.body.appendChild(up);
-            this.render();
+
+            var down = document.createElement("button");
+            down.innerText = "Down";
+
+            down.onclick = (function() {
+                /* "this" refers to the anynomus function instead of the class
+                   ergo the "ev" closure */
+                ev.addEvent(new controller.MoveEvent(model.Dir.Down));
+                ev.nextEvent();
+            });
+            document.body.appendChild(down);
+            var left = document.createElement("button");
+            left.innerText = "Left";
+
+            left.onclick = (function() {
+                /* "this" refers to the anynomus function instead of the class
+                   ergo the "ev" closure */
+                ev.addEvent(new controller.MoveEvent(model.Dir.Left));
+                ev.nextEvent();
+            });
+            document.body.appendChild(left);
+            var right = document.createElement("button");
+            right.innerText = "Right";
+
+            right.onclick = (function() {
+                /* "this" refers to the anynomus function instead of the class
+                   ergo the "ev" closure */
+                ev.addEvent(new controller.MoveEvent(model.Dir.Right));
+                ev.nextEvent();
+            });
+            document.body.appendChild(right);
+
         }
 
         render () : void {
@@ -248,5 +286,10 @@ function main() {
     gameState.loadLevel();
     var eventHandler : controller.EventHandler = new controller.EventHandler(gameState);
     var cli : view.View = new view.View(gameState, eventHandler);
+    cli.render();
+    function callRender() {
+        cli.render();
+    }
+    setInterval(callRender, 100);
 }
 main();
