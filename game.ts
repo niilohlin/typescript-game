@@ -50,6 +50,10 @@ module controller {
         enqueue(obj: T) : void {
             this.queue.push(obj);
         }
+
+        empty() : boolean {
+            return this.queue.length == 0;
+        }
     }
 
     export class EventHandler {
@@ -59,8 +63,10 @@ module controller {
         }
 
         nextEvent() : void {
-            var e = this.fifo.next();
-            e.handle(this.gameState);
+            if(!this.fifo.empty()) {
+                var e = this.fifo.next();
+                e.handle(this.gameState);
+            }
         }
 
         addEvent(e : AbstractEvent) : void {
@@ -143,7 +149,8 @@ module model {
                 hypotheticalX -= 1;
             }
             if(gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-               gs.ver.move(gs, d);
+
+                gs.ver.move(gs, d);
             } else if(gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
                 gs.hor.move(gs, d);
             }
@@ -219,7 +226,6 @@ module view {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(model.Dir.Up));
-                ev.nextEvent();
             });
             document.body.appendChild(up);
 
@@ -230,7 +236,6 @@ module view {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(model.Dir.Down));
-                ev.nextEvent();
             });
             document.body.appendChild(down);
             var left = document.createElement("button");
@@ -240,7 +245,6 @@ module view {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(model.Dir.Left));
-                ev.nextEvent();
             });
             document.body.appendChild(left);
             var right = document.createElement("button");
@@ -250,7 +254,6 @@ module view {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(model.Dir.Right));
-                ev.nextEvent();
             });
             document.body.appendChild(right);
 
@@ -287,9 +290,9 @@ function main() {
     var eventHandler : controller.EventHandler = new controller.EventHandler(gameState);
     var cli : view.View = new view.View(gameState, eventHandler);
     cli.render();
-    function callRender() {
+    setInterval((function() {
+        eventHandler.nextEvent();
         cli.render();
-    }
-    setInterval(callRender, 100);
+    }), 100);
 }
 main();

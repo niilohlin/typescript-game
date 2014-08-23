@@ -75,6 +75,10 @@ var controller;
         Fifo.prototype.enqueue = function (obj) {
             this.queue.push(obj);
         };
+
+        Fifo.prototype.empty = function () {
+            return this.queue.length == 0;
+        };
         return Fifo;
     })();
     controller.Fifo = Fifo;
@@ -85,8 +89,11 @@ var controller;
             this.fifo = new Fifo();
         }
         EventHandler.prototype.nextEvent = function () {
-            var e = this.fifo.next();
-            e.handle(this.gameState);
+            if (!this.fifo.empty()) {
+                console.log("handling event");
+                var e = this.fifo.next();
+                e.handle(this.gameState);
+            }
         };
 
         EventHandler.prototype.addEvent = function (e) {
@@ -267,7 +274,6 @@ var view;
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(0 /* Up */));
-                ev.nextEvent();
             });
             document.body.appendChild(up);
 
@@ -278,7 +284,6 @@ var view;
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(1 /* Down */));
-                ev.nextEvent();
             });
             document.body.appendChild(down);
             var left = document.createElement("button");
@@ -288,7 +293,6 @@ var view;
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(2 /* Left */));
-                ev.nextEvent();
             });
             document.body.appendChild(left);
             var right = document.createElement("button");
@@ -298,7 +302,6 @@ var view;
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
                 ev.addEvent(new controller.MoveEvent(3 /* Right */));
-                ev.nextEvent();
             });
             document.body.appendChild(right);
         }
@@ -335,9 +338,9 @@ function main() {
     var eventHandler = new controller.EventHandler(gameState);
     var cli = new view.View(gameState, eventHandler);
     cli.render();
-    function callRender() {
+    setInterval((function () {
+        eventHandler.nextEvent();
         cli.render();
-    }
-    setInterval(callRender, 100);
+    }), 100);
 }
 main();
