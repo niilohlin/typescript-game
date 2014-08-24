@@ -1,7 +1,3 @@
-* Move movable.canMove(dir) and movable.move(dir)
-  to controller and make it canMove(movable, dir) and
-  move(movable, dir)
-
 * Make other.move generate a new MoveEvent for concistency.
 
 * Unit tests.

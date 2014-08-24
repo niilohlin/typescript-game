@@ -51,67 +51,6 @@ var model;
             this.gameState = gameState;
             this.inHole = false;
         }
-        Movable.prototype.canMove = function (d) {
-            var gs = this.gameState;
-            var hypotheticalX = this.x;
-            var hypotheticalY = this.y;
-
-            if (d == 0 /* Up */) {
-                hypotheticalY -= 1;
-            } else if (d == 1 /* Down */) {
-                hypotheticalY += 1;
-            } else if (d == 3 /* Right */) {
-                hypotheticalX += 1;
-            } else if (d == 2 /* Left */) {
-                hypotheticalX -= 1;
-            }
-            for (var i = 0; i < gs.walls.length; i++) {
-                var w = gs.walls[i];
-                if (w.x == hypotheticalX && w.y == hypotheticalY) {
-                    return false;
-                }
-            }
-            if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                return gs.ver.canMove(d);
-            } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                return gs.hor.canMove(d);
-            }
-            return true;
-        };
-
-        Movable.prototype.move = function (d) {
-            if (this.inHole) {
-                return;
-            }
-            var gs = this.gameState;
-            var hypotheticalX = this.x;
-            var hypotheticalY = this.y;
-
-            if (d == 0 /* Up */) {
-                hypotheticalY -= 1;
-            } else if (d == 1 /* Down */) {
-                hypotheticalY += 1;
-            } else if (d == 3 /* Right */) {
-                hypotheticalX += 1;
-            } else if (d == 2 /* Left */) {
-                hypotheticalX -= 1;
-            }
-            if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                gs.ver.move(d);
-            } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                gs.hor.move(d);
-            }
-            this.x = hypotheticalX;
-            this.y = hypotheticalY;
-
-            if (this.x == gs.hole.x && this.y == gs.hole.y) {
-                this.inHole = true;
-                if (gs.hor.inHole && gs.ver.inHole) {
-                    console.log("you won");
-                    throw new Error("not Implemented yet");
-                }
-            }
-        };
         return Movable;
     })(Square);
     model.Movable = Movable;
@@ -192,6 +131,66 @@ var controller;
             _super.call(this);
             this.direction = d;
         }
+        MoveEvent.prototype.canMove = function (gs, movable, d) {
+            var hypotheticalX = movable.x;
+            var hypotheticalY = movable.y;
+
+            if (d == 0 /* Up */) {
+                hypotheticalY -= 1;
+            } else if (d == 1 /* Down */) {
+                hypotheticalY += 1;
+            } else if (d == 3 /* Right */) {
+                hypotheticalX += 1;
+            } else if (d == 2 /* Left */) {
+                hypotheticalX -= 1;
+            }
+            for (var i = 0; i < gs.walls.length; i++) {
+                var w = gs.walls[i];
+                if (w.x == hypotheticalX && w.y == hypotheticalY) {
+                    return false;
+                }
+            }
+            if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
+                return this.canMove(gs, gs.ver, d);
+            } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
+                return this.canMove(gs, gs.hor, d);
+            }
+            return true;
+        };
+
+        MoveEvent.prototype.move = function (gs, movable, d) {
+            if (movable.inHole) {
+                return;
+            }
+            var hypotheticalX = movable.x;
+            var hypotheticalY = movable.y;
+
+            if (d == 0 /* Up */) {
+                hypotheticalY -= 1;
+            } else if (d == 1 /* Down */) {
+                hypotheticalY += 1;
+            } else if (d == 3 /* Right */) {
+                hypotheticalX += 1;
+            } else if (d == 2 /* Left */) {
+                hypotheticalX -= 1;
+            }
+            if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
+                this.move(gs, gs.ver, d); // Change to event.
+            } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
+                this.move(gs, gs.hor, d); // Change to event.
+            }
+            movable.x = hypotheticalX;
+            movable.y = hypotheticalY;
+
+            if (movable.x == gs.hole.x && movable.y == gs.hole.y) {
+                movable.inHole = true;
+                if (gs.hor.inHole && gs.ver.inHole) {
+                    console.log("you won");
+                    throw new Error("not Implemented yet");
+                }
+            }
+        };
+
         MoveEvent.prototype.handle = function (gs) {
             var player = null;
             if (this.direction == 0 /* Up */ || this.direction == 1 /* Down */) {
@@ -199,8 +198,8 @@ var controller;
             } else {
                 player = gs.hor;
             }
-            if (player.canMove(this.direction)) {
-                player.move(this.direction);
+            if (this.canMove(gs, player, this.direction)) {
+                this.move(gs, player, this.direction);
             } else {
                 console.log("cant move that way");
             }
