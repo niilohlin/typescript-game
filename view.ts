@@ -16,7 +16,7 @@ module view {
             up.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(model.Dir.Up));
+                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Up));
             });
             document.body.appendChild(up);
 
@@ -26,7 +26,7 @@ module view {
             down.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(model.Dir.Down));
+                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Down));
             });
             document.body.appendChild(down);
             var left = document.createElement("button");
@@ -35,7 +35,7 @@ module view {
             left.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(model.Dir.Left));
+                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Left));
             });
             document.body.appendChild(left);
             var right = document.createElement("button");
@@ -44,7 +44,7 @@ module view {
             right.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(model.Dir.Right));
+                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Right));
             });
             document.body.appendChild(right);
 

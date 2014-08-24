@@ -3,18 +3,19 @@
 module controller {
 
     export class AbstractEvent {
-        handle(gs: model.GameState) : void {
+        constructor(public gameState: model.GameState){}
+        handle() : void {
             throw new Error("To be overwritten");
         }
     }
 
     export class MoveEvent extends AbstractEvent {
         direction : model.Dir;
-        constructor(d: model.Dir) {
-            super();
+        constructor(gs: model.GameState, d: model.Dir) {
+            super(gs);
             this.direction = d;
         }
-        canMove(gs: model.GameState, movable : model.Movable, d: model.Dir) {
+        canMove(movable : model.Movable, d: model.Dir) {
             var hypotheticalX = movable.x;
             var hypotheticalY = movable.y;
 
@@ -27,21 +28,21 @@ module controller {
             } else if(d == model.Dir.Left) {
                 hypotheticalX -= 1;
             }
-            for(var i : number = 0; i < gs.walls.length; i++) {
-                var w : model.Wall = gs.walls[i];
+            for(var i : number = 0; i < this.gameState.walls.length; i++) {
+                var w : model.Wall = this.gameState.walls[i];
                 if(w.x == hypotheticalX && w.y == hypotheticalY) {
                     return false;
                 }
             }
-            if(gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                return this.canMove(gs, gs.ver, d);
-            } else if(gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                return this.canMove(gs, gs.hor, d);
+            if(this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
+                return this.canMove(this.gameState.ver, d);
+            } else if(this.gameState.hor.x == hypotheticalX && this.gameState.hor.y == hypotheticalY) {
+                return this.canMove(this.gameState.hor, d);
             }
             return true;
         }
 
-        move(gs: model.GameState, movable : model.Movable, d: model.Dir) {
+        move(movable : model.Movable, d: model.Dir) {
             if(movable.inHole) {
                 return;
             }
@@ -57,35 +58,35 @@ module controller {
             } else if(d == model.Dir.Left) {
                 hypotheticalX -= 1;
             }
-            if(gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
+            if(this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
 
-                this.move(gs, gs.ver, d); // Change to event.
-            } else if(gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-            this.move(gs, gs.hor, d); // Change to event.
+                this.move(this.gameState.ver, d); // Change to event.
+            } else if(this.gameState.hor.x == hypotheticalX && this.gameState.hor.y == hypotheticalY) {
+            this.move(this.gameState.hor, d); // Change to event.
 
             }
             movable.x = hypotheticalX;
             movable.y = hypotheticalY;
 
-            if(movable.x == gs.hole.x && movable.y == gs.hole.y) {
+            if(movable.x == this.gameState.hole.x && movable.y == this.gameState.hole.y) {
                 movable.inHole = true;
-                if(gs.hor.inHole && gs.ver.inHole) {
+                if(this.gameState.hor.inHole && this.gameState.ver.inHole) {
                     console.log("you won");
                     throw new Error("not Implemented yet");
                 }
             }
         }
 
-        handle(gs: model.GameState) : void {
+        handle() : void {
             var player : model.Movable = null;
             if(this.direction == model.Dir.Up ||
                this.direction == model.Dir.Down) {
-                player = gs.ver;
+                player = this.gameState.ver;
             } else {
-                player = gs.hor;
+                player = this.gameState.hor;
             }
-            if(this.canMove(gs, player, this.direction)) {
-                this.move(gs, player, this.direction);
+            if(this.canMove(player, this.direction)) {
+                this.move(player, this.direction);
             } else {
                 console.log("cant move that way");
             }
@@ -93,15 +94,21 @@ module controller {
     }
 
     export class WinEvent extends AbstractEvent {
-        handle(gs: model.GameState) : void {
-            gs.nextLevel();
-            gs.loadLevel();
+        constructor(gs: model.GameState) {
+            super(gs);
+        }
+        handle() : void {
+            this.gameState.nextLevel();
+            this.gameState.loadLevel();
         }
     }
 
     export class RestartEvent extends AbstractEvent {
-        handle(gs: model.GameState) : void {
-            gs.loadLevel();
+        constructor(gs: model.GameState) {
+            super(gs);
+        }
+        handle() : void {
+            this.gameState.loadLevel();
         }
     }
 
@@ -129,7 +136,7 @@ module controller {
         nextEvent() : void {
             if(!this.fifo.empty()) {
                 var e = this.fifo.next();
-                e.handle(this.gameState);
+                e.handle();
             }
         }
 

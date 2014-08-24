@@ -116,9 +116,10 @@ var model;
 var controller;
 (function (controller) {
     var AbstractEvent = (function () {
-        function AbstractEvent() {
+        function AbstractEvent(gameState) {
+            this.gameState = gameState;
         }
-        AbstractEvent.prototype.handle = function (gs) {
+        AbstractEvent.prototype.handle = function () {
             throw new Error("To be overwritten");
         };
         return AbstractEvent;
@@ -127,11 +128,11 @@ var controller;
 
     var MoveEvent = (function (_super) {
         __extends(MoveEvent, _super);
-        function MoveEvent(d) {
-            _super.call(this);
+        function MoveEvent(gs, d) {
+            _super.call(this, gs);
             this.direction = d;
         }
-        MoveEvent.prototype.canMove = function (gs, movable, d) {
+        MoveEvent.prototype.canMove = function (movable, d) {
             var hypotheticalX = movable.x;
             var hypotheticalY = movable.y;
 
@@ -144,21 +145,21 @@ var controller;
             } else if (d == 2 /* Left */) {
                 hypotheticalX -= 1;
             }
-            for (var i = 0; i < gs.walls.length; i++) {
-                var w = gs.walls[i];
+            for (var i = 0; i < this.gameState.walls.length; i++) {
+                var w = this.gameState.walls[i];
                 if (w.x == hypotheticalX && w.y == hypotheticalY) {
                     return false;
                 }
             }
-            if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                return this.canMove(gs, gs.ver, d);
-            } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                return this.canMove(gs, gs.hor, d);
+            if (this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
+                return this.canMove(this.gameState.ver, d);
+            } else if (this.gameState.hor.x == hypotheticalX && this.gameState.hor.y == hypotheticalY) {
+                return this.canMove(this.gameState.hor, d);
             }
             return true;
         };
 
-        MoveEvent.prototype.move = function (gs, movable, d) {
+        MoveEvent.prototype.move = function (movable, d) {
             if (movable.inHole) {
                 return;
             }
@@ -174,32 +175,32 @@ var controller;
             } else if (d == 2 /* Left */) {
                 hypotheticalX -= 1;
             }
-            if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                this.move(gs, gs.ver, d); // Change to event.
-            } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                this.move(gs, gs.hor, d); // Change to event.
+            if (this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
+                this.move(this.gameState.ver, d); // Change to event.
+            } else if (this.gameState.hor.x == hypotheticalX && this.gameState.hor.y == hypotheticalY) {
+                this.move(this.gameState.hor, d); // Change to event.
             }
             movable.x = hypotheticalX;
             movable.y = hypotheticalY;
 
-            if (movable.x == gs.hole.x && movable.y == gs.hole.y) {
+            if (movable.x == this.gameState.hole.x && movable.y == this.gameState.hole.y) {
                 movable.inHole = true;
-                if (gs.hor.inHole && gs.ver.inHole) {
+                if (this.gameState.hor.inHole && this.gameState.ver.inHole) {
                     console.log("you won");
                     throw new Error("not Implemented yet");
                 }
             }
         };
 
-        MoveEvent.prototype.handle = function (gs) {
+        MoveEvent.prototype.handle = function () {
             var player = null;
             if (this.direction == 0 /* Up */ || this.direction == 1 /* Down */) {
-                player = gs.ver;
+                player = this.gameState.ver;
             } else {
-                player = gs.hor;
+                player = this.gameState.hor;
             }
-            if (this.canMove(gs, player, this.direction)) {
-                this.move(gs, player, this.direction);
+            if (this.canMove(player, this.direction)) {
+                this.move(player, this.direction);
             } else {
                 console.log("cant move that way");
             }
@@ -210,12 +211,12 @@ var controller;
 
     var WinEvent = (function (_super) {
         __extends(WinEvent, _super);
-        function WinEvent() {
-            _super.apply(this, arguments);
+        function WinEvent(gs) {
+            _super.call(this, gs);
         }
-        WinEvent.prototype.handle = function (gs) {
-            gs.nextLevel();
-            gs.loadLevel();
+        WinEvent.prototype.handle = function () {
+            this.gameState.nextLevel();
+            this.gameState.loadLevel();
         };
         return WinEvent;
     })(AbstractEvent);
@@ -223,11 +224,11 @@ var controller;
 
     var RestartEvent = (function (_super) {
         __extends(RestartEvent, _super);
-        function RestartEvent() {
-            _super.apply(this, arguments);
+        function RestartEvent(gs) {
+            _super.call(this, gs);
         }
-        RestartEvent.prototype.handle = function (gs) {
-            gs.loadLevel();
+        RestartEvent.prototype.handle = function () {
+            this.gameState.loadLevel();
         };
         return RestartEvent;
     })(AbstractEvent);
@@ -260,7 +261,7 @@ var controller;
         EventHandler.prototype.nextEvent = function () {
             if (!this.fifo.empty()) {
                 var e = this.fifo.next();
-                e.handle(this.gameState);
+                e.handle();
             }
         };
 
@@ -286,7 +287,7 @@ var view;
             up.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(0 /* Up */));
+                ev.addEvent(new controller.MoveEvent(gs, 0 /* Up */));
             });
             document.body.appendChild(up);
 
@@ -296,7 +297,7 @@ var view;
             down.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(1 /* Down */));
+                ev.addEvent(new controller.MoveEvent(gs, 1 /* Down */));
             });
             document.body.appendChild(down);
             var left = document.createElement("button");
@@ -305,7 +306,7 @@ var view;
             left.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(2 /* Left */));
+                ev.addEvent(new controller.MoveEvent(gs, 2 /* Left */));
             });
             document.body.appendChild(left);
             var right = document.createElement("button");
@@ -314,7 +315,7 @@ var view;
             right.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(3 /* Right */));
+                ev.addEvent(new controller.MoveEvent(gs, 3 /* Right */));
             });
             document.body.appendChild(right);
         }
