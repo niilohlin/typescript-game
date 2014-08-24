@@ -77,4 +77,19 @@ module view {
             console.log(rows.join("\n"));
         }
     }
+
+    export class GUI extends View {
+        ctx;
+        width : number;
+        height : number;
+        constructor(gs: model.GameState, ev: controller.EventHandler) {
+            super(gs, ev);
+            var canvas = <HTMLCanvasElement> document.getElementById("canvas");
+            this.width = canvas.width;
+            this.height = canvas.height;
+            this.ctx = canvas.getContext("2d");
+            this.ctx.rect(0, 0, this.width, this.height);
+            this.ctx.stroke();
+        }
+    }
 }

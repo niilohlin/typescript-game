@@ -6,11 +6,11 @@ function main() {
     var gameState : model.GameState = new model.GameState();
     gameState.loadLevel();
     var eventHandler : controller.EventHandler = new controller.EventHandler(gameState);
-    var cli : view.View = new view.View(gameState, eventHandler);
-    cli.render();
+    var GUI : view.GUI = new view.GUI(gameState, eventHandler);
+    GUI.render();
     setInterval((function() {
         eventHandler.nextEvent();
-        cli.render();
+        GUI.render();
     }), 100);
 }
 main();

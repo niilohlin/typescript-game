@@ -348,6 +348,21 @@ var view;
         return View;
     })();
     view.View = View;
+
+    var GUI = (function (_super) {
+        __extends(GUI, _super);
+        function GUI(gs, ev) {
+            _super.call(this, gs, ev);
+            var canvas = document.getElementById("canvas");
+            this.width = canvas.width;
+            this.height = canvas.height;
+            this.ctx = canvas.getContext("2d");
+            this.ctx.rect(0, 0, this.width, this.height);
+            this.ctx.stroke();
+        }
+        return GUI;
+    })(View);
+    view.GUI = GUI;
 })(view || (view = {}));
 /// <reference path="controller.ts" />
 /// <reference path="model.ts" />
@@ -356,11 +371,11 @@ function main() {
     var gameState = new model.GameState();
     gameState.loadLevel();
     var eventHandler = new controller.EventHandler(gameState);
-    var cli = new view.View(gameState, eventHandler);
-    cli.render();
+    var GUI = new view.GUI(gameState, eventHandler);
+    GUI.render();
     setInterval((function () {
         eventHandler.nextEvent();
-        cli.render();
+        GUI.render();
     }), 100);
 }
 main();
