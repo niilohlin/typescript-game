@@ -4,106 +4,6 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var controller;
-(function (controller) {
-    var AbstractEvent = (function () {
-        function AbstractEvent() {
-        }
-        AbstractEvent.prototype.handle = function (gs) {
-            throw new Error("To be overwritten");
-        };
-        return AbstractEvent;
-    })();
-    controller.AbstractEvent = AbstractEvent;
-
-    var MoveEvent = (function (_super) {
-        __extends(MoveEvent, _super);
-        function MoveEvent(d) {
-            _super.call(this);
-            this.direction = d;
-        }
-        MoveEvent.prototype.handle = function (gs) {
-            var player = null;
-            if (this.direction == 0 /* Up */ || this.direction == 1 /* Down */) {
-                player = gs.ver;
-            } else {
-                player = gs.hor;
-            }
-            if (player.canMove(gs, this.direction)) {
-                player.move(gs, this.direction);
-            } else {
-                console.log("cant move that way");
-            }
-        };
-        return MoveEvent;
-    })(AbstractEvent);
-    controller.MoveEvent = MoveEvent;
-
-    var WinEvent = (function (_super) {
-        __extends(WinEvent, _super);
-        function WinEvent() {
-            _super.apply(this, arguments);
-        }
-        WinEvent.prototype.handle = function (gs) {
-            gs.nextLevel();
-            gs.loadLevel();
-        };
-        return WinEvent;
-    })(AbstractEvent);
-    controller.WinEvent = WinEvent;
-
-    var RestartEvent = (function (_super) {
-        __extends(RestartEvent, _super);
-        function RestartEvent() {
-            _super.apply(this, arguments);
-        }
-        RestartEvent.prototype.handle = function (gs) {
-            gs.loadLevel();
-        };
-        return RestartEvent;
-    })(AbstractEvent);
-    controller.RestartEvent = RestartEvent;
-
-    var Fifo = (function () {
-        function Fifo() {
-            this.queue = [];
-        }
-        Fifo.prototype.next = function () {
-            return this.queue.shift();
-        };
-
-        Fifo.prototype.enqueue = function (obj) {
-            this.queue.push(obj);
-        };
-
-        Fifo.prototype.empty = function () {
-            return this.queue.length == 0;
-        };
-        return Fifo;
-    })();
-    controller.Fifo = Fifo;
-
-    var EventHandler = (function () {
-        function EventHandler(gameState) {
-            this.gameState = gameState;
-            this.fifo = new Fifo();
-        }
-        EventHandler.prototype.nextEvent = function () {
-            if (!this.fifo.empty()) {
-                console.log("handling event");
-                var e = this.fifo.next();
-                e.handle(this.gameState);
-            }
-        };
-
-        EventHandler.prototype.addEvent = function (e) {
-            this.fifo.enqueue(e);
-        };
-        return EventHandler;
-    })();
-    controller.EventHandler = EventHandler;
-})(controller || (controller = {}));
-
 var model;
 (function (model) {
     (function (Dir) {
@@ -259,7 +159,107 @@ var model;
     })();
     model.GameState = GameState;
 })(model || (model = {}));
+/// <reference path="model.ts" />
+var controller;
+(function (controller) {
+    var AbstractEvent = (function () {
+        function AbstractEvent() {
+        }
+        AbstractEvent.prototype.handle = function (gs) {
+            throw new Error("To be overwritten");
+        };
+        return AbstractEvent;
+    })();
+    controller.AbstractEvent = AbstractEvent;
 
+    var MoveEvent = (function (_super) {
+        __extends(MoveEvent, _super);
+        function MoveEvent(d) {
+            _super.call(this);
+            this.direction = d;
+        }
+        MoveEvent.prototype.handle = function (gs) {
+            var player = null;
+            if (this.direction == 0 /* Up */ || this.direction == 1 /* Down */) {
+                player = gs.ver;
+            } else {
+                player = gs.hor;
+            }
+            if (player.canMove(gs, this.direction)) {
+                player.move(gs, this.direction);
+            } else {
+                console.log("cant move that way");
+            }
+        };
+        return MoveEvent;
+    })(AbstractEvent);
+    controller.MoveEvent = MoveEvent;
+
+    var WinEvent = (function (_super) {
+        __extends(WinEvent, _super);
+        function WinEvent() {
+            _super.apply(this, arguments);
+        }
+        WinEvent.prototype.handle = function (gs) {
+            gs.nextLevel();
+            gs.loadLevel();
+        };
+        return WinEvent;
+    })(AbstractEvent);
+    controller.WinEvent = WinEvent;
+
+    var RestartEvent = (function (_super) {
+        __extends(RestartEvent, _super);
+        function RestartEvent() {
+            _super.apply(this, arguments);
+        }
+        RestartEvent.prototype.handle = function (gs) {
+            gs.loadLevel();
+        };
+        return RestartEvent;
+    })(AbstractEvent);
+    controller.RestartEvent = RestartEvent;
+
+    var Fifo = (function () {
+        function Fifo() {
+            this.queue = [];
+        }
+        Fifo.prototype.next = function () {
+            return this.queue.shift();
+        };
+
+        Fifo.prototype.enqueue = function (obj) {
+            this.queue.push(obj);
+        };
+
+        Fifo.prototype.empty = function () {
+            return this.queue.length == 0;
+        };
+        return Fifo;
+    })();
+    controller.Fifo = Fifo;
+
+    var EventHandler = (function () {
+        function EventHandler(gameState) {
+            this.gameState = gameState;
+            this.fifo = new Fifo();
+        }
+        EventHandler.prototype.nextEvent = function () {
+            if (!this.fifo.empty()) {
+                var e = this.fifo.next();
+                e.handle(this.gameState);
+            }
+        };
+
+        EventHandler.prototype.addEvent = function (e) {
+            this.fifo.enqueue(e);
+        };
+        return EventHandler;
+    })();
+    controller.EventHandler = EventHandler;
+})(controller || (controller = {}));
+/// <reference path="model.ts" />
+/// <reference path="controller.ts" />
 var view;
 (function (view) {
     var View = (function () {
@@ -331,7 +331,9 @@ var view;
     })();
     view.View = View;
 })(view || (view = {}));
-
+/// <reference path="controller.ts" />
+/// <reference path="model.ts" />
+/// <reference path="view.ts" />
 function main() {
     var gameState = new model.GameState();
     gameState.loadLevel();
