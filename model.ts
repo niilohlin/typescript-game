@@ -27,11 +27,12 @@ module model {
 
     export class Movable extends Square {
         inHole : boolean = false;
-        constructor(x: number, y: number) {
+        constructor(public gameState: GameState, x: number, y: number) {
             super(x, y);
         }
 
-        canMove(gs : GameState, d: Dir) : boolean {
+        canMove(d: Dir) : boolean {
+            var gs = this.gameState;
             var hypotheticalX = this.x;
             var hypotheticalY = this.y;
 
@@ -51,14 +52,15 @@ module model {
                 }
             }
             if(gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                return gs.ver.canMove(gs, d);
+                return gs.ver.canMove(d);
             } else if(gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                return gs.hor.canMove(gs, d);
+                return gs.hor.canMove(d);
             }
             return true;
         }
 
-        move(gs: GameState, d: Dir) : void {
+        move(d: Dir) : void {
+            var gs = this.gameState;
             var hypotheticalX = this.x;
             var hypotheticalY = this.y;
 
@@ -73,9 +75,9 @@ module model {
             }
             if(gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
 
-                gs.ver.move(gs, d);
+                gs.ver.move(d);
             } else if(gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                gs.hor.move(gs, d);
+                gs.hor.move(d);
             }
             this.x = hypotheticalX;
             this.y = hypotheticalY;
@@ -83,14 +85,14 @@ module model {
     }
 
     export class Horizontal extends Movable {
-        constructor(x: number, y: number) {
-            super(x, y);
+        constructor(gs: GameState, x: number, y: number) {
+            super(gs, x, y);
         }
     }
 
     export class Vertical extends Movable {
-        constructor(x: number, y: number) {
-            super(x, y);
+        constructor(gs: GameState, x: number, y: number) {
+            super(gs, x, y);
         }
     }
 
@@ -115,7 +117,7 @@ module model {
         height: number = 9;
         walls : Wall[];
         hole  : Hole;
-        hor   : Horizontal = new Horizontal(5, 5);
+        hor   : Horizontal = new Horizontal(this, 5, 5);
         ver   : Vertical;
         loadLevel() : void {
             this.levelLoader.loadLevel(this, this.level);
