@@ -59,8 +59,12 @@ module view {
                 }
             }
 
-            disp[this.gameState.hor.y][this.gameState.hor.x] = '=';
-            disp[this.gameState.ver.y][this.gameState.ver.x] = '|';
+            if(!this.gameState.hor.inHole) {
+                disp[this.gameState.hor.y][this.gameState.hor.x] = '=';
+            }
+            if(!this.gameState.ver.inHole) {
+                disp[this.gameState.ver.y][this.gameState.ver.x] = '|';
+            }
             disp[this.gameState.hole.y][this.gameState.hole.x] = 'O';
             for(var i:number = 0; i < this.gameState.walls.length; i++) {
                 disp[this.gameState.walls[i].y][this.gameState.walls[i].x] = '#';

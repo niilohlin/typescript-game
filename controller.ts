@@ -22,8 +22,8 @@ module controller {
             } else {
                 player = gs.hor;
             }
-            if(player.canMove(gs, this.direction)) {
-                player.move(gs, this.direction);
+            if(player.canMove(this.direction)) {
+                player.move(this.direction);
             } else {
                 console.log("cant move that way");
             }

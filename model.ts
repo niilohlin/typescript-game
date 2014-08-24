@@ -60,6 +60,9 @@ module model {
         }
 
         move(d: Dir) : void {
+            if(this.inHole) {
+                return;
+            }
             var gs = this.gameState;
             var hypotheticalX = this.x;
             var hypotheticalY = this.y;
@@ -81,6 +84,14 @@ module model {
             }
             this.x = hypotheticalX;
             this.y = hypotheticalY;
+
+            if(this.x == gs.hole.x && this.y == gs.hole.y) {
+                this.inHole = true;
+                if(gs.hor.inHole && gs.ver.inHole) {
+                    console.log("you won");
+                    throw new Error("not Implemented yet");
+                }
+            }
         }
     }
 
@@ -102,8 +113,8 @@ module model {
             gs.height = 9;
             gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7)];
             gs.hole = new Hole(4, 2);
-            gs.hor = new Horizontal(4, 3);
-            gs.ver = new Vertical( 4, 6);
+            gs.hor = new Horizontal(gs, 4, 3);
+            gs.ver = new Vertical(gs, 4, 6);
         }
     }
 

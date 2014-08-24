@@ -46,11 +46,13 @@ var model;
 
     var Movable = (function (_super) {
         __extends(Movable, _super);
-        function Movable(x, y) {
+        function Movable(gameState, x, y) {
             _super.call(this, x, y);
+            this.gameState = gameState;
             this.inHole = false;
         }
-        Movable.prototype.canMove = function (gs, d) {
+        Movable.prototype.canMove = function (d) {
+            var gs = this.gameState;
             var hypotheticalX = this.x;
             var hypotheticalY = this.y;
 
@@ -70,14 +72,18 @@ var model;
                 }
             }
             if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                return gs.ver.canMove(gs, d);
+                return gs.ver.canMove(d);
             } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                return gs.hor.canMove(gs, d);
+                return gs.hor.canMove(d);
             }
             return true;
         };
 
-        Movable.prototype.move = function (gs, d) {
+        Movable.prototype.move = function (d) {
+            if (this.inHole) {
+                return;
+            }
+            var gs = this.gameState;
             var hypotheticalX = this.x;
             var hypotheticalY = this.y;
 
@@ -91,12 +97,20 @@ var model;
                 hypotheticalX -= 1;
             }
             if (gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-                gs.ver.move(gs, d);
+                gs.ver.move(d);
             } else if (gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-                gs.hor.move(gs, d);
+                gs.hor.move(d);
             }
             this.x = hypotheticalX;
             this.y = hypotheticalY;
+
+            if (this.x == gs.hole.x && this.y == gs.hole.y) {
+                this.inHole = true;
+                if (gs.hor.inHole && gs.ver.inHole) {
+                    console.log("you won");
+                    throw new Error("not Implemented yet");
+                }
+            }
         };
         return Movable;
     })(Square);
@@ -104,8 +118,8 @@ var model;
 
     var Horizontal = (function (_super) {
         __extends(Horizontal, _super);
-        function Horizontal(x, y) {
-            _super.call(this, x, y);
+        function Horizontal(gs, x, y) {
+            _super.call(this, gs, x, y);
         }
         return Horizontal;
     })(Movable);
@@ -113,8 +127,8 @@ var model;
 
     var Vertical = (function (_super) {
         __extends(Vertical, _super);
-        function Vertical(x, y) {
-            _super.call(this, x, y);
+        function Vertical(gs, x, y) {
+            _super.call(this, gs, x, y);
         }
         return Vertical;
     })(Movable);
@@ -128,8 +142,8 @@ var model;
             gs.height = 9;
             gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7)];
             gs.hole = new Hole(4, 2);
-            gs.hor = new Horizontal(4, 3);
-            gs.ver = new Vertical(4, 6);
+            gs.hor = new Horizontal(gs, 4, 3);
+            gs.ver = new Vertical(gs, 4, 6);
         };
         return LevelLoader;
     })();
@@ -139,7 +153,7 @@ var model;
             this.level = 0;
             this.width = 9;
             this.height = 9;
-            this.hor = new Horizontal(5, 5);
+            this.hor = new Horizontal(this, 5, 5);
             this.levelLoader = new LevelLoader();
         }
         GameState.prototype.loadLevel = function () {
@@ -185,8 +199,8 @@ var controller;
             } else {
                 player = gs.hor;
             }
-            if (player.canMove(gs, this.direction)) {
-                player.move(gs, this.direction);
+            if (player.canMove(this.direction)) {
+                player.move(this.direction);
             } else {
                 console.log("cant move that way");
             }
@@ -314,8 +328,12 @@ var view;
                 }
             }
 
-            disp[this.gameState.hor.y][this.gameState.hor.x] = '=';
-            disp[this.gameState.ver.y][this.gameState.ver.x] = '|';
+            if (!this.gameState.hor.inHole) {
+                disp[this.gameState.hor.y][this.gameState.hor.x] = '=';
+            }
+            if (!this.gameState.ver.inHole) {
+                disp[this.gameState.ver.y][this.gameState.ver.x] = '|';
+            }
             disp[this.gameState.hole.y][this.gameState.hole.x] = 'O';
             for (var i = 0; i < this.gameState.walls.length; i++) {
                 disp[this.gameState.walls[i].y][this.gameState.walls[i].x] = '#';
