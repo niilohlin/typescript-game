@@ -82,14 +82,45 @@ module view {
         ctx;
         width : number;
         height : number;
+        squareWidth : number;
+        squareHeight : number;
         constructor(gs: model.GameState, ev: controller.EventHandler) {
             super(gs, ev);
             var canvas = <HTMLCanvasElement> document.getElementById("canvas");
             this.width = canvas.width;
             this.height = canvas.height;
             this.ctx = canvas.getContext("2d");
+            this.clearScreen();
+            this.squareWidth = this.width / gs.width;
+            this.squareHeight = this.height / gs.height;
+        }
+
+        private drawSquare(square : model.Square, color : string) {
+            this.ctx.fillStyle = color; // Blue.
+            this.ctx.fillRect(square.x * this.squareWidth , square.y * this.squareHeight, this.squareWidth, this.squareHeight);
+        }
+        private clearScreen() {
+            this.ctx.fillStyle = "#FFFFFF";
+            this.ctx.fillRect(0, 0, this.width, this.height);
+            this.ctx.strokeStyle = "#000000";
             this.ctx.rect(0, 0, this.width, this.height);
             this.ctx.stroke();
+        }
+        render() {
+            this.clearScreen();
+
+            var blue : string = "#0000FF";
+            var red  : string = "#FF0000";
+            var black: string = "#000000";
+
+            this.drawSquare(this.gameState.hor, blue);
+            this.drawSquare(this.gameState.ver, blue);
+
+            for(var i : number = 0; i < this.gameState.walls.length; i++) {
+                this.drawSquare(this.gameState.walls[i], red);
+
+            }
+            this.drawSquare(this.gameState.hole, black);
         }
     }
 }

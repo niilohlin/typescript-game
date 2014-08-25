@@ -357,9 +357,36 @@ var view;
             this.width = canvas.width;
             this.height = canvas.height;
             this.ctx = canvas.getContext("2d");
+            this.clearScreen();
+            this.squareWidth = this.width / gs.width;
+            this.squareHeight = this.height / gs.height;
+        }
+        GUI.prototype.drawSquare = function (square, color) {
+            this.ctx.fillStyle = color; // Blue.
+            this.ctx.fillRect(square.x * this.squareWidth, square.y * this.squareHeight, this.squareWidth, this.squareHeight);
+        };
+        GUI.prototype.clearScreen = function () {
+            this.ctx.fillStyle = "#FFFFFF";
+            this.ctx.fillRect(0, 0, this.width, this.height);
+            this.ctx.strokeStyle = "#000000";
             this.ctx.rect(0, 0, this.width, this.height);
             this.ctx.stroke();
-        }
+        };
+        GUI.prototype.render = function () {
+            this.clearScreen();
+
+            var blue = "#0000FF";
+            var red = "#FF0000";
+            var black = "#000000";
+
+            this.drawSquare(this.gameState.hor, blue);
+            this.drawSquare(this.gameState.ver, blue);
+
+            for (var i = 0; i < this.gameState.walls.length; i++) {
+                this.drawSquare(this.gameState.walls[i], red);
+            }
+            this.drawSquare(this.gameState.hole, black);
+        };
         return GUI;
     })(View);
     view.GUI = GUI;

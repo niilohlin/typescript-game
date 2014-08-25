@@ -30,41 +30,6 @@ module model {
         constructor(public gameState: GameState, x: number, y: number) {
             super(x, y);
         }
-
-        // move(d: Dir) : void {
-        //     if(this.inHole) {
-        //         return;
-        //     }
-        //     var gs = this.gameState;
-        //     var hypotheticalX = this.x;
-        //     var hypotheticalY = this.y;
-
-        //     if(d == Dir.Up) {
-        //         hypotheticalY -= 1;
-        //     } else if(d == Dir.Down) {
-        //         hypotheticalY += 1;
-        //     } else if(d == Dir.Right) {
-        //         hypotheticalX += 1;
-        //     } else if(d == Dir.Left) {
-        //         hypotheticalX -= 1;
-        //     }
-        //     if(gs.ver.x == hypotheticalX && gs.ver.y == hypotheticalY) {
-
-        //         gs.ver.move(d);
-        //     } else if(gs.hor.x == hypotheticalX && gs.hor.y == hypotheticalY) {
-        //         gs.hor.move(d);
-        //     }
-        //     this.x = hypotheticalX;
-        //     this.y = hypotheticalY;
-
-        //     if(this.x == gs.hole.x && this.y == gs.hole.y) {
-        //         this.inHole = true;
-        //         if(gs.hor.inHole && gs.ver.inHole) {
-        //             console.log("you won");
-        //             throw new Error("not Implemented yet");
-        //         }
-        //     }
-        // }
     }
 
     export class Horizontal extends Movable {
