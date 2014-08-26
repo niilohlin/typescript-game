@@ -48,6 +48,15 @@ module view {
             });
             document.body.appendChild(right);
 
+            var restart = document.createElement("button");
+            restart.innerText = "restart";
+
+            restart.onclick = (function() {
+                /* "this" refers to the anynomus function instead of the class
+                   ergo the "ev" closure */
+                ev.addEvent(new controller.RestartEvent(gs));
+            });
+            document.body.appendChild(restart);
         }
 
         render () : void {
@@ -93,6 +102,19 @@ module view {
             this.clearScreen();
             this.squareWidth = this.width / gs.width;
             this.squareHeight = this.height / gs.height;
+            canvas.onkeypress = (function(evt) {
+                var charCode: number = evt.which;
+                var charStr : string = String.fromCharCode(charCode);
+                if(charStr == 'w') {
+                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Up));
+                } else if(charStr == 's') {
+                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Down));
+                } else if(charStr == 'a') {
+                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Left));
+                } else if(charStr == 'd') {
+                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Right));
+                }
+            });
         }
 
         private drawSquare(square : model.Square, color : string) {

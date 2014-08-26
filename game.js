@@ -79,10 +79,10 @@ var model;
         LevelLoader.prototype.loadLevel = function (gs, level) {
             gs.width = 9;
             gs.height = 9;
-            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7)];
+            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
             gs.hole = new Hole(4, 2);
             gs.hor = new Horizontal(gs, 4, 3);
-            gs.ver = new Vertical(gs, 4, 6);
+            gs.ver = new Vertical(gs, 5, 6);
         };
         return LevelLoader;
     })();
@@ -92,7 +92,6 @@ var model;
             this.level = 0;
             this.width = 9;
             this.height = 9;
-            this.hor = new Horizontal(this, 5, 5);
             this.levelLoader = new LevelLoader();
         }
         GameState.prototype.loadLevel = function () {
@@ -132,6 +131,9 @@ var controller;
             _super.call(this, gs);
             this.direction = d;
         }
+        MoveEvent.prototype.inBounds = function (x, y) {
+            return x >= 0 && x < this.gameState.width && y >= 0 && y < this.gameState.height;
+        };
         MoveEvent.prototype.canMove = function (movable, d) {
             var hypotheticalX = movable.x;
             var hypotheticalY = movable.y;
@@ -144,6 +146,9 @@ var controller;
                 hypotheticalX += 1;
             } else if (d == 2 /* Left */) {
                 hypotheticalX -= 1;
+            }
+            if (!this.inBounds(hypotheticalX, hypotheticalY)) {
+                return;
             }
             for (var i = 0; i < this.gameState.walls.length; i++) {
                 var w = this.gameState.walls[i];
@@ -175,6 +180,10 @@ var controller;
             } else if (d == 2 /* Left */) {
                 hypotheticalX -= 1;
             }
+            if (!this.inBounds(hypotheticalX, hypotheticalY)) {
+                return;
+            }
+
             if (this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
                 this.move(this.gameState.ver, d); // Change to event.
             } else if (this.gameState.hor.x == hypotheticalX && this.gameState.hor.y == hypotheticalY) {
@@ -187,7 +196,6 @@ var controller;
                 movable.inHole = true;
                 if (this.gameState.hor.inHole && this.gameState.ver.inHole) {
                     console.log("you won");
-                    throw new Error("not Implemented yet");
                 }
             }
         };
@@ -318,6 +326,16 @@ var view;
                 ev.addEvent(new controller.MoveEvent(gs, 3 /* Right */));
             });
             document.body.appendChild(right);
+
+            var restart = document.createElement("button");
+            restart.innerText = "restart";
+
+            restart.onclick = (function () {
+                /* "this" refers to the anynomus function instead of the class
+                ergo the "ev" closure */
+                ev.addEvent(new controller.RestartEvent(gs));
+            });
+            document.body.appendChild(restart);
         }
         View.prototype.render = function () {
             var disp = [];
@@ -360,6 +378,19 @@ var view;
             this.clearScreen();
             this.squareWidth = this.width / gs.width;
             this.squareHeight = this.height / gs.height;
+            canvas.onkeypress = (function (evt) {
+                var charCode = evt.which;
+                var charStr = String.fromCharCode(charCode);
+                if (charStr == 'w') {
+                    ev.addEvent(new controller.MoveEvent(gs, 0 /* Up */));
+                } else if (charStr == 's') {
+                    ev.addEvent(new controller.MoveEvent(gs, 1 /* Down */));
+                } else if (charStr == 'a') {
+                    ev.addEvent(new controller.MoveEvent(gs, 2 /* Left */));
+                } else if (charStr == 'd') {
+                    ev.addEvent(new controller.MoveEvent(gs, 3 /* Right */));
+                }
+            });
         }
         GUI.prototype.drawSquare = function (square, color) {
             this.ctx.fillStyle = color; // Blue.

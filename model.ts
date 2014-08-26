@@ -48,10 +48,10 @@ module model {
         loadLevel(gs : GameState, level: number) {
             gs.width = 9;
             gs.height = 9;
-            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7)];
+            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
             gs.hole = new Hole(4, 2);
             gs.hor = new Horizontal(gs, 4, 3);
-            gs.ver = new Vertical(gs, 4, 6);
+            gs.ver = new Vertical(gs, 5, 6);
         }
     }
 
@@ -65,7 +65,7 @@ module model {
         height: number = 9;
         walls : Wall[];
         hole  : Hole;
-        hor   : Horizontal = new Horizontal(this, 5, 5);
+        hor   : Horizontal;
         ver   : Vertical;
         loadLevel() : void {
             this.levelLoader.loadLevel(this, this.level);

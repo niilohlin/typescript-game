@@ -15,6 +15,9 @@ module controller {
             super(gs);
             this.direction = d;
         }
+        private inBounds(x: number, y: number) : boolean {
+            return x >= 0 && x < this.gameState.width && y >= 0 && y < this.gameState.height;
+        }
         canMove(movable : model.Movable, d: model.Dir) {
             var hypotheticalX = movable.x;
             var hypotheticalY = movable.y;
@@ -27,6 +30,9 @@ module controller {
                 hypotheticalX += 1;
             } else if(d == model.Dir.Left) {
                 hypotheticalX -= 1;
+            }
+            if(! this.inBounds(hypotheticalX, hypotheticalY)) {
+                return;
             }
             for(var i : number = 0; i < this.gameState.walls.length; i++) {
                 var w : model.Wall = this.gameState.walls[i];
@@ -58,11 +64,14 @@ module controller {
             } else if(d == model.Dir.Left) {
                 hypotheticalX -= 1;
             }
-            if(this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
+            if(! this.inBounds(hypotheticalX, hypotheticalY)) {
+                return;
+            }
 
+            if(this.gameState.ver.x == hypotheticalX && this.gameState.ver.y == hypotheticalY) {
                 this.move(this.gameState.ver, d); // Change to event.
             } else if(this.gameState.hor.x == hypotheticalX && this.gameState.hor.y == hypotheticalY) {
-            this.move(this.gameState.hor, d); // Change to event.
+                this.move(this.gameState.hor, d); // Change to event.
 
             }
             movable.x = hypotheticalX;
@@ -72,7 +81,7 @@ module controller {
                 movable.inHole = true;
                 if(this.gameState.hor.inHole && this.gameState.ver.inHole) {
                     console.log("you won");
-                    throw new Error("not Implemented yet");
+
                 }
             }
         }
