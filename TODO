@@ -1,16 +1,9 @@
-* Make other.move generate a new MoveEvent for concistency.
-
 * Unit tests.
 
-* Wall detection. Border detection.
-
-* Gui.
-
-* Keyboard control. Mouse swipe support.
+* Mouse swipe support.
 
 * Level editor.
 
 * A shitload of levels.
 
 * Levels JSON backend.
-

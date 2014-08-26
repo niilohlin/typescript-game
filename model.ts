@@ -32,16 +32,6 @@ module model {
         }
     }
 
-    class LevelLoader {
-        loadLevel(gs : GameState, level: number) {
-            gs.width = 9;
-            gs.height = 9;
-            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
-            gs.hole = new Hole(4, 2);
-            gs.hor = new Movable(gs, 4, 3);
-            gs.ver = new Movable(gs, 5, 6);
-        }
-    }
 
     export class GameState {
         constructor() {
@@ -68,5 +58,42 @@ module model {
         hasWon() : boolean {
             return this.hor.inHole && this.ver.inHole;
         }
+    }
+
+    interface Level {
+        level:  number;
+        hole:   number[];
+        ver:    number[];
+        hor:    number[];
+        walls:  number[][];
+        width:  number;
+        height: number;
+    }
+    class LevelLoader {
+        loadLevel(gs : GameState, level: number):void {
+            if(level >= this.levels.length) {
+                throw new Error("no levels left");
+            }
+            this.loadGameState(gs, this.levels[level]);
+        }
+
+        loadGameState(gs: GameState, json:Level) {
+            gs.width = json.width;
+            gs.height = json.height;
+            gs.walls = [];
+            for(var i :number = 0; i < json.walls.length; i++) {
+                gs.walls.push(new Wall(json.walls[i][0], json.walls[i][1]));
+            }
+            gs.hole = new Hole(json.hole[0], json.hole[1]);
+            gs.hor = new Movable(gs, json.hor[0], json.hor[1]);
+            gs.ver = new Movable(gs, json.ver[0], json.ver[1]);
+        }
+
+
+        private levels:Level[] = [
+             {"level":0, "width": 5, "height": 5, "walls": [], "ver": [3, 3], "hor": [1, 1], "hole": [3, 1]}
+            ,{"level":1, "width": 5, "height": 5, "walls": [], "ver": [3, 2], "hor": [1, 2], "hole": [4, 2]}
+            ,{"level":2, "width": 6, "height": 5, "walls": [[3, 3]], "ver":[1, 3], "hor": [2, 3], "hole": [4, 3]}
+                                ];
     }
 }

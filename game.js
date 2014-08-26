@@ -55,20 +55,6 @@ var model;
     })(Square);
     model.Movable = Movable;
 
-    var LevelLoader = (function () {
-        function LevelLoader() {
-        }
-        LevelLoader.prototype.loadLevel = function (gs, level) {
-            gs.width = 9;
-            gs.height = 9;
-            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
-            gs.hole = new Hole(4, 2);
-            gs.hor = new Movable(gs, 4, 3);
-            gs.ver = new Movable(gs, 5, 6);
-        };
-        return LevelLoader;
-    })();
-
     var GameState = (function () {
         function GameState() {
             this.level = 0;
@@ -92,6 +78,38 @@ var model;
         return GameState;
     })();
     model.GameState = GameState;
+
+    var LevelLoader = (function () {
+        function LevelLoader() {
+            this.levels = [
+                { "level": 0, "width": 5, "height": 5, "walls": [], "ver": [3, 3], "hor": [1, 1], "hole": [3, 1] },
+                { "level": 1, "width": 5, "height": 5, "walls": [], "ver": [3, 2], "hor": [1, 2], "hole": [4, 2] },
+                { "level": 2, "width": 6, "height": 5, "walls": [[3, 3]], "ver": [1, 3], "hor": [2, 3], "hole": [4, 3] }
+            ];
+        }
+        LevelLoader.prototype.loadLevel = function (gs, level) {
+            gs.width = 9;
+            gs.height = 9;
+            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
+            gs.hole = new Hole(4, 2);
+            gs.hor = new Movable(gs, 4, 3);
+            gs.ver = new Movable(gs, 5, 6);
+            this.loadGameState(gs, this.levels[level]);
+        };
+
+        LevelLoader.prototype.loadGameState = function (gs, json) {
+            gs.width = json.width;
+            gs.height = json.height;
+            gs.walls = [];
+            for (var i = 0; i < json.walls.length; i++) {
+                gs.walls.push(new Wall(json.walls[i][0], json.walls[i][1]));
+            }
+            gs.hole = new Hole(json.hole[0], json.hole[1]);
+            gs.hor = new Movable(gs, json.hor[0], json.hor[1]);
+            gs.ver = new Movable(gs, json.ver[0], json.ver[1]);
+        };
+        return LevelLoader;
+    })();
 })(model || (model = {}));
 /// <reference path="model.ts" />
 var controller;
@@ -105,7 +123,6 @@ var controller;
         };
         return AbstractEvent;
     })();
-    controller.AbstractEvent = AbstractEvent;
 
     var MoveEvent = (function (_super) {
         __extends(MoveEvent, _super);
@@ -118,6 +135,9 @@ var controller;
             return x >= 0 && x < this.gameState.width && y >= 0 && y < this.gameState.height;
         };
         MoveEvent.prototype.canMove = function (movable, d) {
+            if (movable.inHole) {
+                return true;
+            }
             var hypotheticalX = movable.x;
             var hypotheticalY = movable.y;
 
@@ -178,7 +198,7 @@ var controller;
             if (movable.x == this.gameState.hole.x && movable.y == this.gameState.hole.y) {
                 movable.inHole = true;
                 if (this.gameState.hor.inHole && this.gameState.ver.inHole) {
-                    console.log("you won");
+                    this.eventHandler.winEvent();
                 }
             }
         };
@@ -198,7 +218,6 @@ var controller;
         };
         return MoveEvent;
     })(AbstractEvent);
-    controller.MoveEvent = MoveEvent;
 
     var WinEvent = (function (_super) {
         __extends(WinEvent, _super);
@@ -211,7 +230,6 @@ var controller;
         };
         return WinEvent;
     })(AbstractEvent);
-    controller.WinEvent = WinEvent;
 
     var RestartEvent = (function (_super) {
         __extends(RestartEvent, _super);
@@ -223,7 +241,6 @@ var controller;
         };
         return RestartEvent;
     })(AbstractEvent);
-    controller.RestartEvent = RestartEvent;
 
     var Fifo = (function () {
         function Fifo() {
@@ -242,7 +259,6 @@ var controller;
         };
         return Fifo;
     })();
-    controller.Fifo = Fifo;
 
     var EventHandler = (function () {
         function EventHandler(gameState) {
@@ -257,9 +273,6 @@ var controller;
             }
         };
 
-        // addEvent(e : AbstractEvent) : void {
-        //     this.fifo.enqueue(e);
-        // }
         EventHandler.prototype.moveEvent = function (d) {
             this.fifo.enqueue(new MoveEvent(this.gameState, this, d));
         };

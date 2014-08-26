@@ -2,14 +2,14 @@
 
 module controller {
 
-    export class AbstractEvent {
+    class AbstractEvent {
         constructor(public gameState: model.GameState){}
         handle() : void {
             throw new Error("Abstact method");
         }
     }
 
-    export class MoveEvent extends AbstractEvent {
+    class MoveEvent extends AbstractEvent {
         direction : model.Dir;
         constructor(gs: model.GameState, private eventHandler: EventHandler, d: model.Dir) {
             super(gs);
@@ -19,6 +19,9 @@ module controller {
             return x >= 0 && x < this.gameState.width && y >= 0 && y < this.gameState.height;
         }
         canMove(movable : model.Movable, d: model.Dir) {
+            if(movable.inHole) {
+                return true;
+            }
             var hypotheticalX = movable.x;
             var hypotheticalY = movable.y;
 
@@ -80,7 +83,7 @@ module controller {
             if(movable.x == this.gameState.hole.x && movable.y == this.gameState.hole.y) {
                 movable.inHole = true;
                 if(this.gameState.hor.inHole && this.gameState.ver.inHole) {
-                    console.log("you won");
+                    this.eventHandler.winEvent();
 
                 }
             }
@@ -102,7 +105,7 @@ module controller {
         }
     }
 
-    export class WinEvent extends AbstractEvent {
+    class WinEvent extends AbstractEvent {
         constructor(gs: model.GameState) {
             super(gs);
         }
@@ -112,7 +115,7 @@ module controller {
         }
     }
 
-    export class RestartEvent extends AbstractEvent {
+    class RestartEvent extends AbstractEvent {
         constructor(gs: model.GameState) {
             super(gs);
         }
@@ -121,7 +124,7 @@ module controller {
         }
     }
 
-    export class Fifo<T> {
+    class Fifo<T> {
         private queue: Array<T> = [];
         next() : T {
             return this.queue.shift();
@@ -138,7 +141,7 @@ module controller {
 
     export class EventHandler {
         // Acts as a factory.
-        fifo : Fifo<AbstractEvent> = new Fifo<AbstractEvent>();
+        private fifo : Fifo<AbstractEvent> = new Fifo<AbstractEvent>();
 
         constructor(public gameState: model.GameState) {
         }
@@ -149,11 +152,6 @@ module controller {
                 e.handle();
             }
         }
-
-        // addEvent(e : AbstractEvent) : void {
-        //     this.fifo.enqueue(e);
-        // }
-
 
         moveEvent(d: model.Dir): void {
             this.fifo.enqueue(new MoveEvent(this.gameState, this, d));
