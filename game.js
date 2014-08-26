@@ -88,12 +88,9 @@ var model;
             ];
         }
         LevelLoader.prototype.loadLevel = function (gs, level) {
-            gs.width = 9;
-            gs.height = 9;
-            gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
-            gs.hole = new Hole(4, 2);
-            gs.hor = new Movable(gs, 4, 3);
-            gs.ver = new Movable(gs, 5, 6);
+            if (level >= this.levels.length) {
+                throw new Error("no levels left");
+            }
             this.loadGameState(gs, this.levels[level]);
         };
 
@@ -388,13 +385,13 @@ var view;
             canvas.onkeypress = (function (evt) {
                 var charCode = evt.which;
                 var charStr = String.fromCharCode(charCode);
-                if (charStr == 'w') {
+                if (charStr == 'd') {
                     ev.moveEvent(0 /* Up */);
                 } else if (charStr == 's') {
                     ev.moveEvent(1 /* Down */);
                 } else if (charStr == 'a') {
                     ev.moveEvent(2 /* Left */);
-                } else if (charStr == 'd') {
+                } else if (charStr == 'h') {
                     ev.moveEvent(3 /* Right */);
                 } else if (charStr == ' ') {
                     ev.restartEvent();
@@ -402,7 +399,7 @@ var view;
             });
         }
         GUI.prototype.drawSquare = function (square, color) {
-            this.ctx.fillStyle = color; // Blue.
+            this.ctx.fillStyle = color;
             this.ctx.fillRect(square.x * this.squareWidth, square.y * this.squareHeight, this.squareWidth, this.squareHeight);
         };
         GUI.prototype.clearScreen = function () {
@@ -417,10 +414,11 @@ var view;
 
             var blue = "#0000FF";
             var red = "#FF0000";
+            var derp = "#CAFE00";
             var black = "#000000";
 
             this.drawSquare(this.gameState.hor, blue);
-            this.drawSquare(this.gameState.ver, blue);
+            this.drawSquare(this.gameState.ver, derp);
 
             for (var i = 0; i < this.gameState.walls.length; i++) {
                 this.drawSquare(this.gameState.walls[i], red);

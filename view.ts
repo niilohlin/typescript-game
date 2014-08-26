@@ -103,13 +103,13 @@ module view {
             canvas.onkeypress = (function(evt) {
                 var charCode: number = evt.which;
                 var charStr : string = String.fromCharCode(charCode);
-                if(charStr == 'w') {
+                if(charStr == 'd') { // w
                     ev.moveEvent(model.Dir.Up);
-                } else if(charStr == 's') {
+                } else if(charStr == 's') { // s
                     ev.moveEvent(model.Dir.Down);
-                } else if(charStr == 'a') {
+                } else if(charStr == 'a') { // a
                     ev.moveEvent(model.Dir.Left);
-                } else if(charStr == 'd') {
+                } else if(charStr == 'h') { // d
                     ev.moveEvent(model.Dir.Right);
                 } else if(charStr == ' ') {
                     ev.restartEvent();
@@ -118,7 +118,7 @@ module view {
         }
 
         private drawSquare(square : model.Square, color : string) {
-            this.ctx.fillStyle = color; // Blue.
+            this.ctx.fillStyle = color;
             this.ctx.fillRect(square.x * this.squareWidth , square.y * this.squareHeight, this.squareWidth, this.squareHeight);
         }
         private clearScreen() {
@@ -133,10 +133,11 @@ module view {
 
             var blue : string = "#0000FF";
             var red  : string = "#FF0000";
+            var derp  : string = "#CAFE00";
             var black: string = "#000000";
 
             this.drawSquare(this.gameState.hor, blue);
-            this.drawSquare(this.gameState.ver, blue);
+            this.drawSquare(this.gameState.ver, derp);
 
             for(var i : number = 0; i < this.gameState.walls.length; i++) {
                 this.drawSquare(this.gameState.walls[i], red);
