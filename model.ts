@@ -32,26 +32,14 @@ module model {
         }
     }
 
-    export class Horizontal extends Movable {
-        constructor(gs: GameState, x: number, y: number) {
-            super(gs, x, y);
-        }
-    }
-
-    export class Vertical extends Movable {
-        constructor(gs: GameState, x: number, y: number) {
-            super(gs, x, y);
-        }
-    }
-
     class LevelLoader {
         loadLevel(gs : GameState, level: number) {
             gs.width = 9;
             gs.height = 9;
             gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
             gs.hole = new Hole(4, 2);
-            gs.hor = new Horizontal(gs, 4, 3);
-            gs.ver = new Vertical(gs, 5, 6);
+            gs.hor = new Movable(gs, 4, 3);
+            gs.ver = new Movable(gs, 5, 6);
         }
     }
 
@@ -65,8 +53,8 @@ module model {
         height: number = 9;
         walls : Wall[];
         hole  : Hole;
-        hor   : Horizontal;
-        ver   : Vertical;
+        hor   : Movable;
+        ver   : Movable;
         loadLevel() : void {
             this.levelLoader.loadLevel(this, this.level);
             this.hor.inHole = false;

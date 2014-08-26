@@ -5,13 +5,13 @@ module controller {
     export class AbstractEvent {
         constructor(public gameState: model.GameState){}
         handle() : void {
-            throw new Error("To be overwritten");
+            throw new Error("Abstact method");
         }
     }
 
     export class MoveEvent extends AbstractEvent {
         direction : model.Dir;
-        constructor(gs: model.GameState, d: model.Dir) {
+        constructor(gs: model.GameState, private eventHandler: EventHandler, d: model.Dir) {
             super(gs);
             this.direction = d;
         }
@@ -137,6 +137,7 @@ module controller {
     }
 
     export class EventHandler {
+        // Acts as a factory.
         fifo : Fifo<AbstractEvent> = new Fifo<AbstractEvent>();
 
         constructor(public gameState: model.GameState) {
@@ -149,9 +150,21 @@ module controller {
             }
         }
 
-        addEvent(e : AbstractEvent) : void {
-            this.fifo.enqueue(e);
+        // addEvent(e : AbstractEvent) : void {
+        //     this.fifo.enqueue(e);
+        // }
+
+
+        moveEvent(d: model.Dir): void {
+            this.fifo.enqueue(new MoveEvent(this.gameState, this, d));
         }
 
+        winEvent() : void {
+            this.fifo.enqueue(new WinEvent(this.gameState));
+        }
+
+        restartEvent() : void {
+            this.fifo.enqueue(new RestartEvent(this.gameState));
+        }
     }
 }

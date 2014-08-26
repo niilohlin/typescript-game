@@ -55,24 +55,6 @@ var model;
     })(Square);
     model.Movable = Movable;
 
-    var Horizontal = (function (_super) {
-        __extends(Horizontal, _super);
-        function Horizontal(gs, x, y) {
-            _super.call(this, gs, x, y);
-        }
-        return Horizontal;
-    })(Movable);
-    model.Horizontal = Horizontal;
-
-    var Vertical = (function (_super) {
-        __extends(Vertical, _super);
-        function Vertical(gs, x, y) {
-            _super.call(this, gs, x, y);
-        }
-        return Vertical;
-    })(Movable);
-    model.Vertical = Vertical;
-
     var LevelLoader = (function () {
         function LevelLoader() {
         }
@@ -81,8 +63,8 @@ var model;
             gs.height = 9;
             gs.walls = [new Wall(1, 1), new Wall(7, 4), new Wall(6, 7), new Wall(0, 4), new Wall(8, 3)];
             gs.hole = new Hole(4, 2);
-            gs.hor = new Horizontal(gs, 4, 3);
-            gs.ver = new Vertical(gs, 5, 6);
+            gs.hor = new Movable(gs, 4, 3);
+            gs.ver = new Movable(gs, 5, 6);
         };
         return LevelLoader;
     })();
@@ -119,7 +101,7 @@ var controller;
             this.gameState = gameState;
         }
         AbstractEvent.prototype.handle = function () {
-            throw new Error("To be overwritten");
+            throw new Error("Abstact method");
         };
         return AbstractEvent;
     })();
@@ -127,8 +109,9 @@ var controller;
 
     var MoveEvent = (function (_super) {
         __extends(MoveEvent, _super);
-        function MoveEvent(gs, d) {
+        function MoveEvent(gs, eventHandler, d) {
             _super.call(this, gs);
+            this.eventHandler = eventHandler;
             this.direction = d;
         }
         MoveEvent.prototype.inBounds = function (x, y) {
@@ -264,6 +247,7 @@ var controller;
     var EventHandler = (function () {
         function EventHandler(gameState) {
             this.gameState = gameState;
+            // Acts as a factory.
             this.fifo = new Fifo();
         }
         EventHandler.prototype.nextEvent = function () {
@@ -273,8 +257,19 @@ var controller;
             }
         };
 
-        EventHandler.prototype.addEvent = function (e) {
-            this.fifo.enqueue(e);
+        // addEvent(e : AbstractEvent) : void {
+        //     this.fifo.enqueue(e);
+        // }
+        EventHandler.prototype.moveEvent = function (d) {
+            this.fifo.enqueue(new MoveEvent(this.gameState, this, d));
+        };
+
+        EventHandler.prototype.winEvent = function () {
+            this.fifo.enqueue(new WinEvent(this.gameState));
+        };
+
+        EventHandler.prototype.restartEvent = function () {
+            this.fifo.enqueue(new RestartEvent(this.gameState));
         };
         return EventHandler;
     })();
@@ -287,7 +282,6 @@ var view;
     var View = (function () {
         function View(gs, ev) {
             this.gameState = gs;
-            this.eventHandler = ev;
 
             var up = document.createElement("button");
             up.innerText = "Up";
@@ -295,7 +289,7 @@ var view;
             up.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, 0 /* Up */));
+                ev.moveEvent(0 /* Up */);
             });
             document.body.appendChild(up);
 
@@ -305,7 +299,7 @@ var view;
             down.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, 1 /* Down */));
+                ev.moveEvent(1 /* Down */);
             });
             document.body.appendChild(down);
             var left = document.createElement("button");
@@ -314,7 +308,7 @@ var view;
             left.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, 2 /* Left */));
+                ev.moveEvent(2 /* Left */);
             });
             document.body.appendChild(left);
             var right = document.createElement("button");
@@ -323,7 +317,7 @@ var view;
             right.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, 3 /* Right */));
+                ev.moveEvent(3 /* Right */);
             });
             document.body.appendChild(right);
 
@@ -333,7 +327,7 @@ var view;
             restart.onclick = (function () {
                 /* "this" refers to the anynomus function instead of the class
                 ergo the "ev" closure */
-                ev.addEvent(new controller.RestartEvent(gs));
+                ev.restartEvent();
             });
             document.body.appendChild(restart);
         }
@@ -382,13 +376,15 @@ var view;
                 var charCode = evt.which;
                 var charStr = String.fromCharCode(charCode);
                 if (charStr == 'w') {
-                    ev.addEvent(new controller.MoveEvent(gs, 0 /* Up */));
+                    ev.moveEvent(0 /* Up */);
                 } else if (charStr == 's') {
-                    ev.addEvent(new controller.MoveEvent(gs, 1 /* Down */));
+                    ev.moveEvent(1 /* Down */);
                 } else if (charStr == 'a') {
-                    ev.addEvent(new controller.MoveEvent(gs, 2 /* Left */));
+                    ev.moveEvent(2 /* Left */);
                 } else if (charStr == 'd') {
-                    ev.addEvent(new controller.MoveEvent(gs, 3 /* Right */));
+                    ev.moveEvent(3 /* Right */);
+                } else if (charStr == ' ') {
+                    ev.restartEvent();
                 }
             });
         }

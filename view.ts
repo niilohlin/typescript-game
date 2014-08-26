@@ -5,10 +5,8 @@ module view {
 
     export class View {
         gameState : model.GameState;
-        eventHandler : controller.EventHandler;
         constructor(gs: model.GameState, ev: controller.EventHandler) {
             this.gameState = gs;
-            this.eventHandler = ev;
 
             var up = document.createElement("button");
             up.innerText = "Up";
@@ -16,7 +14,7 @@ module view {
             up.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Up));
+                ev.moveEvent(model.Dir.Up);
             });
             document.body.appendChild(up);
 
@@ -26,7 +24,7 @@ module view {
             down.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Down));
+                ev.moveEvent(model.Dir.Down);
             });
             document.body.appendChild(down);
             var left = document.createElement("button");
@@ -35,7 +33,7 @@ module view {
             left.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Left));
+                ev.moveEvent(model.Dir.Left);
             });
             document.body.appendChild(left);
             var right = document.createElement("button");
@@ -44,7 +42,7 @@ module view {
             right.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.MoveEvent(gs, model.Dir.Right));
+                ev.moveEvent(model.Dir.Right);
             });
             document.body.appendChild(right);
 
@@ -54,7 +52,7 @@ module view {
             restart.onclick = (function() {
                 /* "this" refers to the anynomus function instead of the class
                    ergo the "ev" closure */
-                ev.addEvent(new controller.RestartEvent(gs));
+                ev.restartEvent();
             });
             document.body.appendChild(restart);
         }
@@ -106,13 +104,15 @@ module view {
                 var charCode: number = evt.which;
                 var charStr : string = String.fromCharCode(charCode);
                 if(charStr == 'w') {
-                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Up));
+                    ev.moveEvent(model.Dir.Up);
                 } else if(charStr == 's') {
-                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Down));
+                    ev.moveEvent(model.Dir.Down);
                 } else if(charStr == 'a') {
-                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Left));
+                    ev.moveEvent(model.Dir.Left);
                 } else if(charStr == 'd') {
-                    ev.addEvent(new controller.MoveEvent(gs, model.Dir.Right));
+                    ev.moveEvent(model.Dir.Right);
+                } else if(charStr == ' ') {
+                    ev.restartEvent();
                 }
             });
         }
