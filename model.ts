@@ -1,15 +1,12 @@
-
 module model {
     export enum Dir {Up, Down, Left, Right};
 
     export class Square {
         x : number;
         y : number;
-        dim : number;
-        constructor(x: number, y: number, dim: number = 10) {
+        constructor(x: number, y: number) {
             this.x = x;
             this.y = y;
-            this.dim = dim;
         }
     }
 
@@ -60,7 +57,7 @@ module model {
         }
     }
 
-    interface Level {
+    export interface Level {
         level:  number;
         hole:   number[];
         ver:    number[];
@@ -72,7 +69,7 @@ module model {
     class LevelLoader {
         loadLevel(gs : GameState, level: number):void {
             if(level >= this.levels.length) {
-                throw new Error("no levels left");
+                throw Error("oops, no levels left");
             }
             this.loadGameState(gs, this.levels[level]);
         }
@@ -94,6 +91,7 @@ module model {
              {"level":0, "width": 5, "height": 5, "walls": [], "ver": [3, 3], "hor": [1, 1], "hole": [3, 1]}
             ,{"level":1, "width": 5, "height": 5, "walls": [], "ver": [3, 2], "hor": [1, 2], "hole": [4, 2]}
             ,{"level":2, "width": 6, "height": 5, "walls": [[3, 3]], "ver":[1, 3], "hor": [2, 3], "hole": [4, 3]}
+            ,{"level":3, "width": 9, "height": 7, "walls": [[3, 3], [5, 1], [2, 3]], "ver":[1, 3], "hor": [3, 2], "hole": [4, 3]}
                                 ];
     }
 }

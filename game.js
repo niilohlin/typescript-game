@@ -16,11 +16,9 @@ var model;
     ;
 
     var Square = (function () {
-        function Square(x, y, dim) {
-            if (typeof dim === "undefined") { dim = 10; }
+        function Square(x, y) {
             this.x = x;
             this.y = y;
-            this.dim = dim;
         }
         return Square;
     })();
@@ -84,12 +82,13 @@ var model;
             this.levels = [
                 { "level": 0, "width": 5, "height": 5, "walls": [], "ver": [3, 3], "hor": [1, 1], "hole": [3, 1] },
                 { "level": 1, "width": 5, "height": 5, "walls": [], "ver": [3, 2], "hor": [1, 2], "hole": [4, 2] },
-                { "level": 2, "width": 6, "height": 5, "walls": [[3, 3]], "ver": [1, 3], "hor": [2, 3], "hole": [4, 3] }
+                { "level": 2, "width": 6, "height": 5, "walls": [[3, 3]], "ver": [1, 3], "hor": [2, 3], "hole": [4, 3] },
+                { "level": 3, "width": 9, "height": 7, "walls": [[3, 3], [5, 1], [2, 3]], "ver": [1, 3], "hor": [3, 2], "hole": [4, 3] }
             ];
         }
         LevelLoader.prototype.loadLevel = function (gs, level) {
             if (level >= this.levels.length) {
-                throw new Error("no levels left");
+                throw Error("oops, no levels left");
             }
             this.loadGameState(gs, this.levels[level]);
         };
@@ -385,13 +384,13 @@ var view;
             canvas.onkeypress = (function (evt) {
                 var charCode = evt.which;
                 var charStr = String.fromCharCode(charCode);
-                if (charStr == 'd') {
+                if (charStr == 'w' || charCode == 38) {
                     ev.moveEvent(0 /* Up */);
-                } else if (charStr == 's') {
+                } else if (charStr == 's' || charCode == 40) {
                     ev.moveEvent(1 /* Down */);
-                } else if (charStr == 'a') {
+                } else if (charStr == 'a' || charCode == 37) {
                     ev.moveEvent(2 /* Left */);
-                } else if (charStr == 'h') {
+                } else if (charStr == 'd' || charCode == 39) {
                     ev.moveEvent(3 /* Right */);
                 } else if (charStr == ' ') {
                     ev.restartEvent();
@@ -403,22 +402,33 @@ var view;
             this.ctx.fillRect(square.x * this.squareWidth, square.y * this.squareHeight, this.squareWidth, this.squareHeight);
         };
         GUI.prototype.clearScreen = function () {
+            this.squareWidth = this.width / this.gameState.width;
+            this.squareHeight = this.height / this.gameState.height;
             this.ctx.fillStyle = "#FFFFFF";
             this.ctx.fillRect(0, 0, this.width, this.height);
             this.ctx.strokeStyle = "#000000";
             this.ctx.rect(0, 0, this.width, this.height);
             this.ctx.stroke();
         };
+        GUI.prototype.drawLinesOnSquares = function () {
+            this.ctx.fillStyle = "#000000";
+            var hor = this.gameState.hor;
+            var ver = this.gameState.ver;
+            var lineWidth = 10;
+
+            this.ctx.fillRect(hor.x * this.squareWidth, hor.y * this.squareHeight + this.squareHeight / 2 - lineWidth / 2, this.squareWidth, lineWidth);
+            this.ctx.fillRect(ver.x * this.squareWidth + this.squareWidth / 2 - lineWidth / 2, ver.y * this.squareHeight, lineWidth, this.squareHeight);
+        };
         GUI.prototype.render = function () {
             this.clearScreen();
 
             var blue = "#0000FF";
             var red = "#FF0000";
-            var derp = "#CAFE00";
             var black = "#000000";
 
             this.drawSquare(this.gameState.hor, blue);
-            this.drawSquare(this.gameState.ver, derp);
+            this.drawSquare(this.gameState.ver, blue);
+            this.drawLinesOnSquares();
 
             for (var i = 0; i < this.gameState.walls.length; i++) {
                 this.drawSquare(this.gameState.walls[i], red);

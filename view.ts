@@ -103,13 +103,13 @@ module view {
             canvas.onkeypress = (function(evt) {
                 var charCode: number = evt.which;
                 var charStr : string = String.fromCharCode(charCode);
-                if(charStr == 'd') { // w
+                if(charStr == 'w' || charCode == 38) {
                     ev.moveEvent(model.Dir.Up);
-                } else if(charStr == 's') { // s
+                } else if(charStr == 's' || charCode == 40) {
                     ev.moveEvent(model.Dir.Down);
-                } else if(charStr == 'a') { // a
+                } else if(charStr == 'a' || charCode == 37) {
                     ev.moveEvent(model.Dir.Left);
-                } else if(charStr == 'h') { // d
+                } else if(charStr == 'd' || charCode == 39) {
                     ev.moveEvent(model.Dir.Right);
                 } else if(charStr == ' ') {
                     ev.restartEvent();
@@ -122,22 +122,35 @@ module view {
             this.ctx.fillRect(square.x * this.squareWidth , square.y * this.squareHeight, this.squareWidth, this.squareHeight);
         }
         private clearScreen() {
+            this.squareWidth = this.width / this.gameState.width;
+            this.squareHeight = this.height / this.gameState.height;
             this.ctx.fillStyle = "#FFFFFF";
             this.ctx.fillRect(0, 0, this.width, this.height);
             this.ctx.strokeStyle = "#000000";
             this.ctx.rect(0, 0, this.width, this.height);
             this.ctx.stroke();
         }
+        private drawLinesOnSquares() {
+            this.ctx.fillStyle = "#000000";
+            var hor: model.Movable = this.gameState.hor;
+            var ver: model.Movable = this.gameState.ver;
+            var lineWidth : number = 10;
+
+            this.ctx.fillRect(hor.x * this.squareWidth, hor.y * this.squareHeight + this.squareHeight / 2 - lineWidth / 2,
+                              this.squareWidth, lineWidth);
+            this.ctx.fillRect(ver.x * this.squareWidth + this.squareWidth / 2 - lineWidth / 2, ver.y * this.squareHeight,
+                              lineWidth, this.squareHeight);
+        }
         render() {
             this.clearScreen();
 
             var blue : string = "#0000FF";
             var red  : string = "#FF0000";
-            var derp  : string = "#CAFE00";
             var black: string = "#000000";
 
             this.drawSquare(this.gameState.hor, blue);
-            this.drawSquare(this.gameState.ver, derp);
+            this.drawSquare(this.gameState.ver, blue);
+            this.drawLinesOnSquares();
 
             for(var i : number = 0; i < this.gameState.walls.length; i++) {
                 this.drawSquare(this.gameState.walls[i], red);

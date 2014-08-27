@@ -1,3 +1,4 @@
+/// <reference path="model.ts" />
 
 class Optional<T> {
     constructor(private obj: T) {
@@ -19,4 +20,24 @@ class Optional<T> {
     }
 }
 
+function randomNat():number {
+    return Math.floor(Math.random()*20 + 1);
+}
+
+function generatelevels() : model.Level {
+    var level: model.Level = {'level':-1, 'hole': [], 'ver':[], 'hor':[], 'walls':[], 'width':-1, "height": -1};
+    level.width  = randomNat();
+    level.height = randomNat();
+    var getRandomCoordinate = function() {
+        return [randomNat() % level.width, randomNat() % level.height];
+    }
+    level.hole = getRandomCoordinate();
+    level.hor = getRandomCoordinate();
+    level.ver = getRandomCoordinate();
+    var number_of_walls:number = randomNat();
+    for(var i:number = 0; i < number_of_walls; i++) {
+        level.walls.push(getRandomCoordinate());
+    }
+    return level;
+}
 

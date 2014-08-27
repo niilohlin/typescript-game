@@ -22,8 +22,8 @@ module controller {
             if(movable.inHole) {
                 return true;
             }
-            var hypotheticalX = movable.x;
-            var hypotheticalY = movable.y;
+            var hypotheticalX:number = movable.x;
+            var hypotheticalY:number = movable.y;
 
             if(d == model.Dir.Up) {
                 hypotheticalY -= 1;
