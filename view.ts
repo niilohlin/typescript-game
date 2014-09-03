@@ -86,6 +86,7 @@ module view {
     }
 
     export class GUI extends View {
+        canvas : HTMLCanvasElement;
         ctx;
         width : number;
         height : number;
@@ -93,14 +94,14 @@ module view {
         squareHeight : number;
         constructor(gs: model.GameState, ev: controller.EventHandler) {
             super(gs, ev);
-            var canvas = <HTMLCanvasElement> document.getElementById("canvas");
-            this.width = canvas.width;
-            this.height = canvas.height;
-            this.ctx = canvas.getContext("2d");
+            this.canvas = <HTMLCanvasElement> document.getElementById("canvas");
+            this.width = this.canvas.width;
+            this.height = this.canvas.height;
+            this.ctx = this.canvas.getContext("2d");
             this.clearScreen();
             this.squareWidth = this.width / gs.width;
             this.squareHeight = this.height / gs.height;
-            canvas.onkeypress = (function(evt) {
+            this.canvas.onkeypress = (function(evt) {
                 var charCode: number = evt.which;
                 var charStr : string = String.fromCharCode(charCode);
                 if(charStr == 'w' || charCode == 38) {
@@ -117,11 +118,15 @@ module view {
             });
         }
 
-        private drawSquare(square : model.Square, color : string) {
+        drawSquare(square : model.Square, color : string) {
+            // Nullcheck because things might be null when editing levels.
+            if(square == null) {
+                return;
+            }
             this.ctx.fillStyle = color;
             this.ctx.fillRect(square.x * this.squareWidth , square.y * this.squareHeight, this.squareWidth, this.squareHeight);
         }
-        private clearScreen() {
+        clearScreen() {
             this.squareWidth = this.width / this.gameState.width;
             this.squareHeight = this.height / this.gameState.height;
             this.ctx.fillStyle = "#FFFFFF";
@@ -130,16 +135,20 @@ module view {
             this.ctx.rect(0, 0, this.width, this.height);
             this.ctx.stroke();
         }
-        private drawLinesOnSquares() {
+        drawLinesOnSquares() {
             this.ctx.fillStyle = "#000000";
             var hor: model.Movable = this.gameState.hor;
             var ver: model.Movable = this.gameState.ver;
             var lineWidth : number = 10;
 
-            this.ctx.fillRect(hor.x * this.squareWidth, hor.y * this.squareHeight + this.squareHeight / 2 - lineWidth / 2,
-                              this.squareWidth, lineWidth);
-            this.ctx.fillRect(ver.x * this.squareWidth + this.squareWidth / 2 - lineWidth / 2, ver.y * this.squareHeight,
-                              lineWidth, this.squareHeight);
+            if(hor != null) {
+                this.ctx.fillRect(hor.x * this.squareWidth, hor.y * this.squareHeight + this.squareHeight / 2 - lineWidth / 2,
+                                  this.squareWidth, lineWidth);
+            }
+            if(ver != null) {
+                this.ctx.fillRect(ver.x * this.squareWidth + this.squareWidth / 2 - lineWidth / 2, ver.y * this.squareHeight,
+                                  lineWidth, this.squareHeight);
+            }
         }
         render() {
             this.clearScreen();
@@ -157,6 +166,28 @@ module view {
 
             }
             this.drawSquare(this.gameState.hole, black);
+        }
+    }
+
+    export class EditorGUI extends GUI {
+        currentSquare: model.Square;
+        constructor(gs: model.GameState, ev: controller.EventHandler) {
+            super(gs, ev);
+            this.canvas.onclick = (function(e) {
+                this.getSquare(e.clientX, e.clientY);
+            });
+
+            var wall = document.createElement("button");
+            wall.innerText = "wall";
+
+            wall.onclick = (function() {
+                this.currentSquare = model.Wall;
+            });
+            document.body.appendChild(wall);
+        }
+
+        getSquare(x: number, y: number) {
+
         }
     }
 }

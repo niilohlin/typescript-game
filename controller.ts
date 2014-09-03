@@ -18,6 +18,18 @@ module controller {
         private inBounds(x: number, y: number) : boolean {
             return x >= 0 && x < this.gameState.width && y >= 0 && y < this.gameState.height;
         }
+        private dirToVector(d: model.Dir): model.Vector {
+            if(d == model.Dir.Up) {
+                return {x: 0, y: -1};
+            } else if(d == model.Dir.Down) {
+                return {x: 0, y: 1};
+            } else if(d == model.Dir.Right) {
+                return {x: 1, y: 0};
+            } else if(d == model.Dir.Left) {
+                return {x: -1, y: 0};
+            }
+
+        }
         canMove(movable : model.Movable, d: model.Dir) {
             if(movable.inHole) {
                 return true;
@@ -82,9 +94,8 @@ module controller {
 
             if(movable.x == this.gameState.hole.x && movable.y == this.gameState.hole.y) {
                 movable.inHole = true;
-                if(this.gameState.hor.inHole && this.gameState.ver.inHole) {
+                if(this.gameState.hasWon()) {
                     this.eventHandler.winEvent();
-
                 }
             }
         }

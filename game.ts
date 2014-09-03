@@ -442,10 +442,19 @@ var view;
     var EditorGUI = (function (_super) {
         __extends(EditorGUI, _super);
         function EditorGUI(gs, ev) {
+            console.log("kalas");
             _super.call(this, gs, ev);
+
+            // function doMouseDown(e) {
+            //     console.log("x = " + e.pagex);
+            //     console.log("y = " + e.pagey);
+            // }
+            // this.canvas.addEventListener("click", doMouseDown, false);
             this.canvas.onclick = (function (e) {
                 console.log(e);
             });
+
+            console.log("kalas");
         }
         return EditorGUI;
     })(GUI);
@@ -454,11 +463,35 @@ var view;
 /// <reference path="controller.ts" />
 /// <reference path="model.ts" />
 /// <reference path="view.ts" />
+var Marker = (function (_super) {
+    __extends(Marker, _super);
+    function Marker() {
+        _super.apply(this, arguments);
+    }
+    Marker.prototype.canMove = function (d) {
+        return true;
+    };
+
+    Marker.prototype.move = function (d) {
+        if (d == 0 /* Up */) {
+            this.y -= 1;
+        }
+        if (d == 1 /* Down */) {
+            this.y += 1;
+        }
+        if (d == 2 /* Left */) {
+            this.x -= 1;
+        }
+        if (d == 3 /* Right */) {
+            this.x += 1;
+        }
+    };
+    return Marker;
+})(model.Movable);
 function main() {
     var gameState = new model.GameState();
     gameState.loadLevel();
     var eventHandler = new controller.EventHandler(gameState);
-    console.log("creating editor gui");
     var GUI = new view.EditorGUI(gameState, eventHandler);
     GUI.render();
     setInterval((function () {

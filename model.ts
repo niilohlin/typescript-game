@@ -1,9 +1,13 @@
 module model {
     export enum Dir {Up, Down, Left, Right};
+    export interface Vector {
+        x: number;
+        y: number;
+    }
 
-    export class Square {
-        x : number;
-        y : number;
+    export class Square implements Vector {
+        x: number;
+        y: number;
         constructor(x: number, y: number) {
             this.x = x;
             this.y = y;
