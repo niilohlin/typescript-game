@@ -42,7 +42,7 @@ module model {
         private level : number = 0;
         width : number = 9;
         height: number = 9;
-        walls : Wall[];
+        walls : Wall[] = [];
         hole  : Hole;
         hor   : Movable;
         ver   : Movable;

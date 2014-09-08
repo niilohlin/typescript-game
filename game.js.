@@ -537,8 +537,6 @@ var view;
             this.canvas.onclick = (function (e) {
                 GUARD(this.currentSquare);
                 var v = this.getSquare(e);
-                LOG("this.squareHeight = " + this.squareHeight);
-                LOG("x = " + e.clientX + ", y = " + e.clientY);
                 LOG("clicking on x = " + v.x + ", y = " + v.y);
                 if (this.currentSquare == model.Wall) {
                     LOG("adding wall");

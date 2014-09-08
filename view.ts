@@ -1,21 +1,23 @@
 /// <reference path="model.ts" />
 /// <reference path="controller.ts" />
+/// <reference path="util.ts" />
 
 module view {
 
     export class View {
         gameState : model.GameState;
+        eventHandler : controller.EventHandler;
         constructor(gs: model.GameState, ev: controller.EventHandler) {
+            GUARD(gs, ev);
             this.gameState = gs;
+            this.eventHandler = ev;
 
             var up = document.createElement("button");
             up.innerText = "Up";
 
             up.onclick = (function() {
-                /* "this" refers to the anynomus function instead of the class
-                   ergo the "ev" closure */
-                ev.moveEvent(model.Dir.Up);
-            });
+                this.eventHandler.moveEvent(model.Dir.Up);
+            }.bind(this));
             document.body.appendChild(up);
 
             var down = document.createElement("button");
@@ -174,20 +176,31 @@ module view {
         constructor(gs: model.GameState, ev: controller.EventHandler) {
             super(gs, ev);
             this.canvas.onclick = (function(e) {
-                this.getSquare(e.clientX, e.clientY);
-            });
+                GUARD(this.currentSquare);
+                var v = this.getSquare(e);
+                LOG("this.squareHeight = " + this.squareHeight);
+                LOG("x = " + e.clientX + ", y = " + e.clientY);
+                LOG("clicking on x = " + v.x + ", y = " + v.y);
+                if(this.currentSquare == model.Wall) {
+                    this.gameState.walls.push(new model.Wall(v.x, v.y));
+                }
+            }.bind(this));
 
             var wall = document.createElement("button");
             wall.innerText = "wall";
 
             wall.onclick = (function() {
                 this.currentSquare = model.Wall;
-            });
+                LOG("setting current square to wall");
+            }.bind(this));
             document.body.appendChild(wall);
         }
 
-        getSquare(x: number, y: number) {
-
+        getSquare(e : any): model.Vector {
+            return {
+                x: Math.floor(e.clientX / this.squareWidth),
+                y: Math.floor(e.clientY / this.squareHeight)
+            };
         }
     }
 }
